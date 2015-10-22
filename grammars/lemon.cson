@@ -1,0 +1,153 @@
+name: 'Lemon'
+scopeName: 'source.lemon'
+fileTypes: [
+  'y', # NOTE 'y' may conflict with language-bison package
+  'lemon'
+]
+
+patterns: [
+  { include: '#comments' }
+  { include: '#grammars' }
+  { include: '#directives' }
+]
+
+repository:
+  'comments':
+    patterns: [
+      { include: 'source.c#comments' }
+    ]
+  'grammars':
+    patterns: [
+      { include: '#grammar-rules' }
+      { include: '#grammar-actions' }
+    ]
+  'directives':
+    patterns: [
+      { include: '#conditional-directives' }
+      { include: '#list-directives' }
+      { include: '#token-class-directives' }
+      { include: '#block-directives' }
+      { include: '#single-directives' }
+    ]
+
+  'grammar-rules':
+    {
+      begin: '\\b([a-z_][a-zA-Z_0-9]*)(?:\\((\\w+)\\))?\\s*(::=)\\s*'
+      beginCaptures:
+        1: name: 'variable.other.lemon'
+        2: name: 'variable.parameter.lemon'
+        3: name: 'keyword.operator.rule.lemon'
+      end: "(\\.)"
+      endCaptures:
+        1: name: 'keyword.operator.dot.lemon'
+      name: 'meta.grammar-rule.lemon'
+      patterns: [
+        { include: '#comments' }
+        { include: '#terminals' }
+        { include: '#nonterminals' }
+        { include: '#conditional-directives' }
+      ]
+    }
+  'grammar-actions':
+    {
+      begin: '({)\\s*'
+      beginCaptures:
+        1: name: 'keyword.operator.begin.lemon'
+      end: '(})'
+      endCaptures:
+        1: name: 'keyword.operator.end.lemon'
+      name: 'meta.grammar-action.lemon'
+      patterns: [
+        { include: '#sources' }
+      ]
+    }
+
+  'conditional-directives':
+    {
+      match: '^\\s*(%(?:ifn?def|endif))\\s+(\\w+)\\s*'
+      captures:
+        1: name: 'keyword.directive.lemon'
+        2: name: 'entity.name.function.lemon'
+      name: 'meta.conditional-directive.lemon'
+    }
+  'list-directives':
+    {
+      begin: '^\\s*(%(?:left|right|nonassoc|fallback|wildcard))\\s+'
+      beginCaptures:
+        1: name: 'keyword.directive.lemon'
+      end: '(\\.)'
+      endCaptures:
+        1: name: 'keyword.operator.dot.lemon'
+      name: 'meta.list-directive.lemon'
+      patterns: [
+        { include: '#comments' }
+        { include: '#terminals' }
+        { include: '#conditional-directives' }
+      ]
+    }
+  'token-class-directives':
+    {
+      begin: '^\\s*(%token_class)\\s+([a-z_][a-zA-Z0-9_]*)\\s+'
+      beginCaptures:
+        1: name: 'keyword.directive.lemon'
+        2: name: 'variable.other.lemon'
+      end: '\\s*(\\.)'
+      endCaptures:
+        1: name: 'keyword.operator.dot.lemon'
+      name: 'meta.token-class-directive.lemon'
+      patterns: [
+        {
+          name: 'constant.character.terminal.lemon'
+          match: '[A-Z][a-zA-Z_0-9]*'
+        }
+        {
+          name: 'keyword.operator.separator.lemon'
+          match: '[|/]'
+        }
+      ]
+    }
+  'block-directives':
+    {
+      begin: '^\\s*(%[a-z_]+)(?:\\s+|\\s*([a-z_][a-zA-Z0-9_]*)\\s*)({)\\s*'
+      beginCaptures:
+        1: name: 'keyword.directive.lemon'
+        2: name: 'variable.other.lemon'
+        3: name: 'keyword.operator.begin.lemon'
+      end: '(})'
+      endCaptures:
+        1: name: 'keyword.operator.end.lemon'
+      name: 'meta.block-directive.lemon'
+      patterns: [
+        { include: '#sources' }
+      ]
+    }
+  'single-directives':
+    {
+      match: '^\\s*(%[a-z_]+)\\s+(\\w+)\\s*'
+      captures:
+        1: name: 'keyword.directive.lemon'
+        2: name: 'variable.other.c'
+      name: 'meta.directive.lemon'
+    }
+
+  'terminals':
+    {
+      match: '([A-Z][a-zA-Z0-9_]*)(?:\\((\\w+)\\))?\\s*'
+      captures:
+        1: name: 'constant.character.terminal.lemon'
+        2: name: 'variable.parameter.lemon'
+      name: 'meta.terminal.lemon'
+    }
+  'nonterminals':
+    {
+      match: '([a-z_][a-zA-Z0-9_]*)(?:\\((\\w+)\\))?\\s*'
+      captures:
+        1: name: 'variable.other.lemon'
+        2: name: "variable.parameter.lemon"
+      name: 'meta.nonterminal.lemon'
+    }
+  'sources':
+    patterns: [
+      { include: 'source.c' }
+      { include: 'source.c++' }
+    ]
